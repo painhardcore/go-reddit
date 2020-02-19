@@ -2,8 +2,8 @@ package reddit
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -95,18 +95,18 @@ func (c *Client) EditLinkText(linkID string, text string) error {
 }
 
 // GetHotLinks retrieves a listing of hot links.
-func (c *Client) GetHotLinks(subreddit string) ([]*Link, error) {
-	return c.getLinks(subreddit, "hot")
+func (c *Client) GetHotLinks(ctx context.Context, subreddit string) ([]*Link, error) {
+	return c.getLinks(ctx, subreddit, "hot")
 }
 
 // GetNewLinks retrieves a listing of new links.
-func (c *Client) GetNewLinks(subreddit string) ([]*Link, error) {
-	return c.getLinks(subreddit, "new")
+func (c *Client) GetNewLinks(ctx context.Context, subreddit string) ([]*Link, error) {
+	return c.getLinks(ctx, subreddit, "new")
 }
 
 // GetTopLinks retrieves a listing of top links.
-func (c *Client) GetTopLinks(subreddit string) ([]*Link, error) {
-	return c.getLinks(subreddit, "top")
+func (c *Client) GetTopLinks(ctx context.Context, subreddit string) ([]*Link, error) {
+	return c.getLinks(ctx, subreddit, "top")
 }
 
 // HideLink removes the given link from the user's default view of subreddit listings. Requires the 'report' OAuth scope.
@@ -128,20 +128,21 @@ func (c *Client) HideLink(linkID string) error {
 	if err != nil {
 		return err
 	} else if resp.StatusCode >= 400 {
-		return errors.New(fmt.Sprintf("HTTP Status Code: %d", resp.StatusCode))
+		return fmt.Errorf("HTTP Status Code: %d", resp.StatusCode)
 	}
 	defer resp.Body.Close()
 
 	return nil
 }
 
-func (c *Client) getLinks(subreddit string, sort string) ([]*Link, error) {
+func (c *Client) getLinks(ctx context.Context, subreddit string, sort string) ([]*Link, error) {
 	url := fmt.Sprintf("%s/r/%s/%s.json", baseURL, subreddit, sort)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
+	req = req.WithContext(ctx)
 	req.Header.Add("User-Agent", c.userAgent)
 
 	resp, err := c.http.Do(req)

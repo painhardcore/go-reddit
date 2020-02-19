@@ -1,10 +1,12 @@
 package reddit
 
 import (
+	"context"
 	"fmt"
+	"testing"
+
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestDeleteLink(t *testing.T) {
@@ -46,7 +48,7 @@ func TestGetHotLinks(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	client := NoAuthClient
-	links, err := client.GetHotLinks("news")
+	links, err := client.GetHotLinks(context.Background(), "news")
 	assert.NoError(t, err)
 	assert.Equal(t, len(links), 3)
 }
@@ -57,7 +59,7 @@ func TestGetNewLinks(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	client := NoAuthClient
-	links, err := client.GetNewLinks("news")
+	links, err := client.GetNewLinks(context.Background(), "news")
 	assert.NoError(t, err)
 	assert.Equal(t, len(links), 3)
 }
@@ -68,7 +70,7 @@ func TestGetTopLinks(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	client := NoAuthClient
-	links, err := client.GetTopLinks("news")
+	links, err := client.GetTopLinks(context.Background(), "news")
 	assert.NoError(t, err)
 	assert.Equal(t, len(links), 3)
 }
